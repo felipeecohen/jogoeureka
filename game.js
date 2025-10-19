@@ -6,46 +6,24 @@ document.addEventListener('DOMContentLoaded', function () {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // --- 1.1. CARREGAR CONTOUR DA CIDADE (Com Diagnóstico) ---
-    fetch('SCS.geojson') // Verifique se o nome do arquivo aqui é o correto ('SCS.geojson' ou 'Sao Caetano do Sul.geojson')
-        .then(response => {
-            // 🚨 Diagnóstico 1: Checa o status da requisição
-            console.log('Status da Requisição (response.ok):', response.ok);
-            
-            if (!response.ok) {
-                // Lança um erro se o arquivo não for encontrado (404) ou houver outro erro HTTP
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+    // --- 1.1. CARREGAR CONTOUR DA CIDADE ---
+    fetch('SCS.geojson')
+        .then(response => response.json())
         .then(data => {
-            // 🚨 Diagnóstico 2: Exibe o objeto GeoJSON carregado
-            console.log('GeoJSON carregado com sucesso:', data);
-            
-            // 🚨 Diagnóstico 3: Exibe o tipo de Geometria
-            if (data.features && data.features.length > 0) {
-                 console.log('Tipo de Geometria do primeiro Feature:', data.features[0].geometry.type);
-            }
-            
-            // Renderiza o contorno (L.geoJSON resolve o aninhamento e inversão)
-            const geoJsonLayer = L.geoJSON(data, {
+            L.geoJSON(data, {
                 style: {
-                    color: '#0d2dfc',    // cor da borda do contorno
-                    weight: 5,           // espessura da linha
-                    fill: false          // sem preenchimento
+                    color: '#0d2dfc',
+                    weight: 3,
+                    fill: false
                 }
             }).addTo(map);
-
-            // Opcional: Ajusta o zoom para o limite do GeoJSON
-            // map.fitBounds(geoJsonLayer.getBounds());
         })
         .catch(err => {
-            // Se cair aqui, o arquivo não foi encontrado (404) ou o JSON é inválido
-            console.error('Erro fatal ao carregar GeoJSON:', err);
-            alert("Não foi possível carregar o limite da cidade. Verifique se o arquivo SCS.geojson existe e está no caminho correto.");
+            console.error('Erro ao carregar GeoJSON:', err);
+            alert("Não foi possível carregar o contorno da cidade.");
         });
 
-    // --- 2. DADOS (30 opções e 7 corretos / gabarito) ---
+    // --- 2. DADOS (30 opções e 7 corretos) ---
     const selectablePoints = [
         [-23.614, -46.569], [-23.620, -46.574], [-23.618, -46.555], [-23.625, -46.563],
         [-23.630, -46.558], [-23.622, -46.551], [-23.611, -46.561], [-23.628, -46.572],
@@ -81,11 +59,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const gameInfoDiv = document.querySelector('.game-info');
     const mapDiv = document.getElementById('map');
 
-    if (!startScreen || !startButton || !startNameInput) {
-        console.error("Elementos da tela inicial não encontrados. Verifique os IDs.");
-        return;
-    }
-
     submitButton.disabled = true;
 
     // --- 4. INICIAR O JOGO ---
@@ -100,51 +73,53 @@ document.addEventListener('DOMContentLoaded', function () {
         startScreen.classList.add('hidden');
         startScreen.style.display = 'none';
 
-        if (mapDiv) mapDiv.classList.remove('map-disabled');
-
         gameInfoDiv.classList.remove('hidden');
         submitButton.classList.remove('hidden');
+
+        if (mapDiv) mapDiv.classList.remove('map-disabled');
 
         startButton.disabled = true;
         gameState = 'playing';
 
-        // Corrige tamanho do mapa após overlay sumir (melhor prática no Leaflet)
-        setTimeout(() => map.invalidateSize(), 120); 
-        console.log('Jogo iniciado por:', playerName);
+        // Corrige renderização do mapa
+        setTimeout(() => {
+            map.invalidateSize();
+            map.fitBounds(L.featureGroup(selectablePoints.map(p => L.latLng(p))).getBounds());
+        }, 150);
     });
 
     // --- 5. CRIA OS MARCADORES ---
-    selectablePoints.forEach((point, index) => {
-        const marker = L.circleMarker(point, {
-            radius: 7,
-            color: 'green',
-            fillColor: '#4CAF50',
-            fillOpacity: 0.8
-        }).addTo(map).bindTooltip(`Ponto ${index + 1}`);
+   selectablePoints.forEach((point, index) => {
+    const marker = L.circleMarker(point, {
+        radius: 7,
+        color: '#818281',    // cinza
+        fillColor: '#818281', 
+        fillOpacity: 0.8
+    }).addTo(map).bindTooltip(`Ponto ${index + 1}`);
 
-        marker.on('click', function () {
-            if (gameState !== 'playing') return;
+    marker.on('click', function () {
+        if (gameState !== 'playing') return;
 
-            if (userSelections.includes(marker)) {
-                if (marker.selectedCircle) {
-                    map.removeLayer(marker.selectedCircle);
-                    marker.selectedCircle = null;
-                }
-                userSelections = userSelections.filter(m => m !== marker);
-            } else if (userSelections.length < MAX_SELECTIONS) {
-                const highlight = L.circleMarker(point, {
-                    radius: 10,
-                    color: '#007bff',
-                    fillColor: '#007bff',
-                    fillOpacity: 0.9
-                }).addTo(map);
-                marker.selectedCircle = highlight;
-                userSelections.push(marker);
+        if (userSelections.includes(marker)) {
+            if (marker.selectedCircle) {
+                map.removeLayer(marker.selectedCircle);
+                marker.selectedCircle = null;
             }
+            userSelections = userSelections.filter(m => m !== marker);
+        } else if (userSelections.length < MAX_SELECTIONS) {
+            const highlight = L.circleMarker(point, {
+                radius: 10,
+                color: '#FFB300',   // amarelo mais escuro
+                fillColor: '#FFB300',
+                fillOpacity: 0.9
+            }).addTo(map);
+            marker.selectedCircle = highlight;
+            userSelections.push(marker);
+        }
 
-            updateUI();
-        });
+        updateUI();
     });
+});
 
     function updateUI() {
         pointsSelectedSpan.innerText = userSelections.length;
@@ -157,17 +132,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         gameState = 'finished';
 
-        // mostra gabarito
-        correctPoints.forEach(p => {
-            L.circleMarker(p, {
-                radius: 9,
-                color: '#00cc66',
-                fillColor: '#00cc66',
-                fillOpacity: 0.9
-            }).addTo(map).bindPopup("Ponto ideal");
-        });
-
-        // contar acertos
         const toleranciaMetros = 150;
         const correctMatched = new Array(correctPoints.length).fill(false);
         let acertos = 0;
@@ -191,6 +155,17 @@ document.addEventListener('DOMContentLoaded', function () {
                 correctMatched[closestIdx] = true;
             }
         });
+
+       // mostra gabarito apenas com borda verde
+correctPoints.forEach(p => {
+    L.circleMarker(p, {
+        radius: 10,
+        color: 'green',       // borda verde
+        weight: 4,            // borda mais espessa
+        fillColor: 'transparent',
+        fillOpacity: 0
+    }).addTo(map).bindPopup("Ponto ideal");
+});
 
         showResults(acertos);
     });
@@ -219,4 +194,3 @@ document.addEventListener('DOMContentLoaded', function () {
     playAgainButton.addEventListener('click', () => location.reload());
 
 });
-
