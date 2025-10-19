@@ -6,19 +6,44 @@ document.addEventListener('DOMContentLoaded', function () {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // --- 1.1. CARREGAR CONTOUR DA CIDADE ---
-    fetch('SCS.geojson')
-        .then(response => response.json())
+    // --- 1.1. CARREGAR CONTOUR DA CIDADE (Com Diagnóstico) ---
+    fetch('SCS.geojson') // Verifique se o nome do arquivo aqui é o correto ('SCS.geojson' ou 'Sao Caetano do Sul.geojson')
+        .then(response => {
+            // 🚨 Diagnóstico 1: Checa o status da requisição
+            console.log('Status da Requisição (response.ok):', response.ok);
+            
+            if (!response.ok) {
+                // Lança um erro se o arquivo não for encontrado (404) ou houver outro erro HTTP
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
-            L.geoJSON(data, {
+            // 🚨 Diagnóstico 2: Exibe o objeto GeoJSON carregado
+            console.log('GeoJSON carregado com sucesso:', data);
+            
+            // 🚨 Diagnóstico 3: Exibe o tipo de Geometria
+            if (data.features && data.features.length > 0) {
+                 console.log('Tipo de Geometria do primeiro Feature:', data.features[0].geometry.type);
+            }
+            
+            // Renderiza o contorno (L.geoJSON resolve o aninhamento e inversão)
+            const geoJsonLayer = L.geoJSON(data, {
                 style: {
-                    color: '#ff6600',    // cor da borda do contorno
-                    weight: 3,           // espessura da linha
-                    fill: false          // sem preenchimento
+                    color: '#ff6600',    // cor da borda do contorno
+                    weight: 3,           // espessura da linha
+                    fill: false          // sem preenchimento
                 }
             }).addTo(map);
+
+            // Opcional: Ajusta o zoom para o limite do GeoJSON
+            // map.fitBounds(geoJsonLayer.getBounds());
         })
-        .catch(err => console.error('Erro ao carregar geojson:', err));
+        .catch(err => {
+            // Se cair aqui, o arquivo não foi encontrado (404) ou o JSON é inválido
+            console.error('Erro fatal ao carregar GeoJSON:', err);
+            alert("Não foi possível carregar o limite da cidade. Verifique se o arquivo SCS.geojson existe e está no caminho correto.");
+        });
 
     // --- 2. DADOS (30 opções e 7 corretos / gabarito) ---
     const selectablePoints = [
@@ -83,8 +108,8 @@ document.addEventListener('DOMContentLoaded', function () {
         startButton.disabled = true;
         gameState = 'playing';
 
-        // Corrige tamanho do mapa após overlay sumir
-        setTimeout(() => map.invalidateSize(), 120);
+        // Corrige tamanho do mapa após overlay sumir (melhor prática no Leaflet)
+        setTimeout(() => map.invalidateSize(), 120); 
         console.log('Jogo iniciado por:', playerName);
     });
 
@@ -194,4 +219,3 @@ document.addEventListener('DOMContentLoaded', function () {
     playAgainButton.addEventListener('click', () => location.reload());
 
 });
-
