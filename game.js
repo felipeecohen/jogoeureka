@@ -120,8 +120,8 @@ document.addEventListener('DOMContentLoaded', function () {
    selectablePoints.forEach((point, index) => {
     const marker = L.circleMarker(point, {
         radius: 7,
-        color: '#818281',    // cinza
-        fillColor: '#818281', 
+        color: '#070f63',    // azul-marinho
+        fillColor: '#070f63', 
         fillOpacity: 0.8
     }).addTo(map).bindTooltip(`Ponto ${index + 1}`);
 
@@ -222,4 +222,5 @@ correctPoints.forEach(p => {
     playAgainButton.addEventListener('click', () => location.reload());
 
 });
+
 
