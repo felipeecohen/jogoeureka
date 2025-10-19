@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ranking - EV Charger Game</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- Estilos específicos do ranking --- */
+        body.ranking-body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .ranking-container {
+            background: white;
+            padding: 30px;
+            margin-top: 50px;
+            border-radius: 16px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 600px;
+        }
+
+        h1 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+        }
+
+        th, td {
+            border-bottom: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #2e7d32;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f8f8f8;
+        }
+
+        .back-link {
+            display: inline-block;
+            background-color: #2e7d32;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        .back-link:hover {
+            background-color: #1b5e20;
+        }
+
+        /* Botão de reset */
+        .reset-button {
+            background-color: #c0392b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-top: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .reset-button:hover {
+            background-color: #e74c3c;
+        }
+    </style>
+</head>
+<body class="ranking-body">
+    <div class="ranking-container">
+        <h1>🏆 Ranking 🏆</h1>
+        <p>Os melhores planejadores de infraestrutura urbana.</p>
+
+        <table id="ranking-table">
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>Nome</th>
+                    <th>Pontuação</th>
+                </tr>
+            </thead>
+            <tbody id="ranking-body">
+                <!-- Linhas do ranking serão inseridas aqui -->
+            </tbody>
+        </table>
+
+        <a href="index.html" class="back-link">Voltar ao Jogo</a>
+        <br>
+        <button id="reset-ranking" class="reset-button">Resetar Ranking</button>
+    </div>
+
+    <script>
+        // --- Exibe o ranking salvo no localStorage ---
+        const rankingBody = document.getElementById('ranking-body');
+        const ranking = JSON.parse(localStorage.getItem('ranking')) || [];
+
+        // Ordena por pontuação (maior primeiro)
+        ranking.sort((a, b) => b.score - a.score);
+
+        // Preenche a tabela
+        ranking.forEach((entry, index) => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${index + 1}º</td>
+                <td>${entry.name}</td>
+                <td>${entry.score}</td>
+            `;
+            rankingBody.appendChild(row);
+        });
+
+        // --- Função de reset do ranking ---
+        document.getElementById('reset-ranking').addEventListener('click', () => {
+            if (confirm("Tem certeza que deseja apagar todo o ranking?")) {
+                localStorage.removeItem("ranking");
+                alert("Ranking resetado com sucesso!");
+                location.reload();
+            }
+        });
+    </script>
+</body>
+</html>

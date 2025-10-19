@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EV Charger Game - São Caetano</title>
+    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+</head>
+<body>
+    <!-- 🔹 TELA INICIAL -->
+    <div id="start-screen" class="overlay">
+        <div class="overlay-content">
+            <h1>⚡ EV Chargers SCS</h1>
+            <p>Descubra onde instalar os 7 melhores pontos de recarga elétrica em São Caetano!</p>
+
+            <input type="text" id="startName" placeholder="Digite seu nome">
+            <button id="startButton">Iniciar Jogo</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="header">
+                <span class="menu-icon">☰</span>
+                <h2>EV Chargers SCS</h2>
+            </div>
+
+            <div class="game-info hidden">
+                <h3>Instruções</h3>
+                <p>Selecione no mapa os <strong>7 pontos</strong> onde você instalaria carregadores elétricos.</p>
+                <div class="selection-counter">
+                    <span id="points-selected">0</span> de 7 pontos selecionados.
+                </div>
+            </div>
+
+            <button id="submit-button" class="hidden" disabled>Analisar Pontos</button>
+
+            <div id="result" class="hidden">
+                <h3>Resultado</h3>
+                <p>Sua pontuação foi:</p>
+                <h1 id="score">0</h1>
+                <p id="feedback-text"></p>
+                <button id="play-again-button">Jogar Novamente</button>
+            </div>
+
+            <div class="footer">
+                <a href="ranking.html">Ver Ranking</a>
+            </div>
+        </div>
+        <div id="map" class="map-disabled"></div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+    <script src="game.js"></script>
+</body>
+</html>
