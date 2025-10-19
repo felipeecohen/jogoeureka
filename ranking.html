@@ -75,22 +75,28 @@
             background-color: #1b5e20;
         }
 
-        /* Botão de reset */
-        .reset-button {
-            background-color: #c0392b;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: bold;
-            margin-top: 20px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
+        /* Botão reset ranking discreto */
+.reset-button {
+    position: fixed;
+    bottom: 15px;
+    right: 15px;
+    background-color: #c0392b;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    font-size: 0.8rem;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    z-index: 1000;
+    transition: 0.2s;
+}
 
-        .reset-button:hover {
-            background-color: #e74c3c;
-        }
+.reset-button:hover {
+    background-color: #e74c3c;
+}
+
     </style>
 </head>
 <body class="ranking-body">
