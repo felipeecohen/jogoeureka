@@ -237,3 +237,64 @@ tr:hover {
 .back-link:hover {
     background-color: #0056b3;
 }
+
+/* Botão reset ranking */
+.reset-button {
+    background-color: #c0392b;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-top: 20px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.reset-button:hover {
+    background-color: #e74c3c;
+}
+
+/* ======= RESPONSIVIDADE ======= */
+
+/* Tablets */
+@media (max-width: 1024px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 2px solid #ddd;
+        box-shadow: none;
+    }
+
+    #map {
+        height: 60vh;
+    }
+}
+
+/* Celulares */
+@media (max-width: 600px) {
+    .sidebar {
+        padding: 15px;
+    }
+
+    .header h2 {
+        font-size: 1.2rem;
+    }
+
+    .game-info h3 {
+        font-size: 1rem;
+    }
+
+    button {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+
+    #map {
+        height: 50vh;
+    }
+}
