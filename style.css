@@ -238,63 +238,27 @@ tr:hover {
     background-color: #0056b3;
 }
 
-/* Botão reset ranking */
-.reset-button {
-    background-color: #c0392b;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: bold;
-    margin-top: 20px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.reset-button:hover {
-    background-color: #e74c3c;
-}
-
-/* ======= RESPONSIVIDADE ======= */
-
-/* Tablets */
-@media (max-width: 1024px) {
-    .container {
-        flex-direction: column;
+/* ======= RESPONSIVIDADE CELULAR/TABLET ======= */
+@media (max-width: 768px) {
+    /* Esconde o título e os três riscos do menu */
+    .sidebar .header h2,
+    .sidebar .header .menu-icon {
+        display: none;
     }
 
+    /* Reduz a largura da sidebar */
     .sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 2px solid #ddd;
-        box-shadow: none;
-    }
-
-    #map {
-        height: 60vh;
-    }
-}
-
-/* Celulares */
-@media (max-width: 600px) {
-    .sidebar {
+        width: 200px;
         padding: 15px;
     }
 
-    .header h2 {
-        font-size: 1.2rem;
-    }
-
-    .game-info h3 {
-        font-size: 1rem;
-    }
-
-    button {
-        font-size: 0.9rem;
-        padding: 10px;
-    }
-
+    /* Ajusta mapa para ocupar o restante da tela */
     #map {
-        height: 50vh;
+        width: calc(100% - 200px);
+    }
+
+    /* Ajuste geral de padding para conteúdos internos se necessário */
+    .overlay-content {
+        padding: 40px 30px;
     }
 }
