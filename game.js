@@ -6,6 +6,20 @@ document.addEventListener('DOMContentLoaded', function () {
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
+    // --- 1.1. CARREGAR CONTOUR DA CIDADE ---
+    fetch('Sao Caetano Do Sul.geojson')
+        .then(response => response.json())
+        .then(data => {
+            L.geoJSON(data, {
+                style: {
+                    color: '#ff6600',    // cor da borda do contorno
+                    weight: 3,           // espessura da linha
+                    fill: false          // sem preenchimento
+                }
+            }).addTo(map);
+        })
+        .catch(err => console.error('Erro ao carregar geojson:', err));
+
     // --- 2. DADOS (30 opções e 7 corretos / gabarito) ---
     const selectablePoints = [
         [-23.614, -46.569], [-23.620, -46.574], [-23.618, -46.555], [-23.625, -46.563],
@@ -18,7 +32,6 @@ document.addEventListener('DOMContentLoaded', function () {
         [-23.622, -46.569], [-23.619, -46.553]
     ];
 
-    // 🔹 Gabarito: 7 pontos corretos (substitua conforme quiser)
     const correctPoints = [
         [-23.614, -46.569], [-23.620, -46.574], [-23.630, -46.558],
         [-23.611, -46.561], [-23.628, -46.572], [-23.619, -46.565], [-23.623, -46.549]
@@ -43,16 +56,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const gameInfoDiv = document.querySelector('.game-info');
     const mapDiv = document.getElementById('map');
 
-    // Segurança: se algum elemento obrigatório não existir, avisar
     if (!startScreen || !startButton || !startNameInput) {
-        console.error("Elementos da tela inicial não encontrados. Verifique os IDs: 'start-screen', 'startButton', 'startName'.");
+        console.error("Elementos da tela inicial não encontrados. Verifique os IDs.");
         return;
     }
 
-    // Desativa o submitButton inicialmente
     submitButton.disabled = true;
 
-    // --- 4. INICIAR O JOGO (overlay -> ocultar + liberar mapa) ---
+    // --- 4. INICIAR O JOGO ---
     startButton.addEventListener('click', () => {
         const name = startNameInput.value.trim();
         if (!name) {
@@ -61,27 +72,23 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         playerName = name;
 
-        // Força esconder o overlay (duas formas para compatibilidade)
         startScreen.classList.add('hidden');
         startScreen.style.display = 'none';
 
-        // libera a interação com o mapa (remove classe que bloqueia)
-        if (mapDiv) {
-            mapDiv.classList.remove('map-disabled');
-        }
+        if (mapDiv) mapDiv.classList.remove('map-disabled');
 
-        // mostra UI do jogo
         gameInfoDiv.classList.remove('hidden');
         submitButton.classList.remove('hidden');
 
-        // evita múltiplos cliques no Start
         startButton.disabled = true;
-
         gameState = 'playing';
+
+        // Corrige tamanho do mapa após overlay sumir
+        setTimeout(() => map.invalidateSize(), 120);
         console.log('Jogo iniciado por:', playerName);
     });
 
-    // --- 5. CRIA OS MARCADORES (30 opções) ---
+    // --- 5. CRIA OS MARCADORES ---
     selectablePoints.forEach((point, index) => {
         const marker = L.circleMarker(point, {
             radius: 7,
@@ -94,14 +101,12 @@ document.addEventListener('DOMContentLoaded', function () {
             if (gameState !== 'playing') return;
 
             if (userSelections.includes(marker)) {
-                // remove seleção
                 if (marker.selectedCircle) {
                     map.removeLayer(marker.selectedCircle);
                     marker.selectedCircle = null;
                 }
                 userSelections = userSelections.filter(m => m !== marker);
             } else if (userSelections.length < MAX_SELECTIONS) {
-                // adiciona seleção (e sinal visual)
                 const highlight = L.circleMarker(point, {
                     radius: 10,
                     color: '#007bff',
@@ -110,9 +115,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 }).addTo(map);
                 marker.selectedCircle = highlight;
                 userSelections.push(marker);
-            } else {
-                // limite alcançado -> mensagem opcional
-                // alert(`Você já selecionou ${MAX_SELECTIONS} pontos.`);
             }
 
             updateUI();
@@ -124,37 +126,13 @@ document.addEventListener('DOMContentLoaded', function () {
         submitButton.disabled = (userSelections.length < MAX_SELECTIONS) || (gameState !== 'playing');
     }
 
-    // --- 6. SUBMETER E CALCULAR PONTUAÇÃO ---
+    // --- 6. SUBMETER E CALCULAR ACERTOS ---
     submitButton.addEventListener('click', () => {
         if (userSelections.length !== MAX_SELECTIONS || gameState !== 'playing') return;
 
         gameState = 'finished';
-        let totalScore = 0;
 
-        userSelections.forEach(marker => {
-            let closest = Infinity;
-            const pos = marker.getLatLng();
-            correctPoints.forEach(c => {
-                const d = map.distance(pos, c);
-                if (d < closest) closest = d;
-            });
-            const pointScore = Math.max(0, 14.3 * (1 - (closest / 1000))); // escala para ~100 total
-            totalScore += pointScore;
-        });
-
-        const finalScore = Math.round(totalScore);
-        showResults(finalScore);
-    });
-
-    function showResults(score) {
-        scoreSpan.innerText = score;
-        feedbackText.innerText =
-            score > 90 ? "Excelente!" :
-            score > 70 ? "Muito bom!" :
-            score > 40 ? "Bom trabalho!" :
-            "Continue tentando!";
-
-        // mostra gabarito visualmente
+        // mostra gabarito
         correctPoints.forEach(p => {
             L.circleMarker(p, {
                 radius: 9,
@@ -164,13 +142,50 @@ document.addEventListener('DOMContentLoaded', function () {
             }).addTo(map).bindPopup("Ponto ideal");
         });
 
-        // salva no ranking local
-        const ranking = JSON.parse(localStorage.getItem("ranking") || "[]");
-        ranking.push({ name: playerName, score });
-        ranking.sort((a,b) => b.score - a.score);
-        localStorage.setItem("ranking", JSON.stringify(ranking));
+        // contar acertos
+        const toleranciaMetros = 150;
+        const correctMatched = new Array(correctPoints.length).fill(false);
+        let acertos = 0;
 
-        // atualiza UI
+        userSelections.forEach(marker => {
+            const pos = marker.getLatLng();
+            let closestIdx = -1;
+            let closestDist = Infinity;
+
+            correctPoints.forEach((c, idx) => {
+                if (correctMatched[idx]) return;
+                const d = map.distance(pos, c);
+                if (d < closestDist) {
+                    closestDist = d;
+                    closestIdx = idx;
+                }
+            });
+
+            if (closestIdx !== -1 && closestDist <= toleranciaMetros) {
+                acertos += 1;
+                correctMatched[closestIdx] = true;
+            }
+        });
+
+        showResults(acertos);
+    });
+
+    function showResults(acertos) {
+        scoreSpan.innerText = `${acertos}/${MAX_SELECTIONS}`;
+
+        feedbackText.innerText =
+            acertos === MAX_SELECTIONS ? "Perfeito! Você acertou todos os pontos!" :
+            acertos >= 5 ? "Excelente! Suas escolhas foram muito boas!" :
+            acertos >= 3 ? "Bom trabalho, mas dá pra melhorar." :
+            "Continue tentando! Veja onde estão os pontos verdes.";
+
+        if (playerName) {
+            const ranking = JSON.parse(localStorage.getItem("ranking") || "[]");
+            ranking.push({ name: playerName, hits: acertos, score: `${acertos}/${MAX_SELECTIONS}` });
+            ranking.sort((a, b) => b.hits - a.hits);
+            localStorage.setItem("ranking", JSON.stringify(ranking));
+        }
+
         gameInfoDiv.classList.add('hidden');
         submitButton.classList.add('hidden');
         resultDiv.classList.remove('hidden');
