@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }).addTo(map);
 
     // --- 1.1. CARREGAR CONTOUR DA CIDADE ---
-    fetch('Sao Caetano Do Sul.geojson')
+    fetch('SCS.geojson')
         .then(response => response.json())
         .then(data => {
             L.geoJSON(data, {
@@ -194,3 +194,4 @@ document.addEventListener('DOMContentLoaded', function () {
     playAgainButton.addEventListener('click', () => location.reload());
 
 });
+
