@@ -30,8 +30,8 @@ document.addEventListener('DOMContentLoaded', function () {
             // Renderiza o contorno (L.geoJSON resolve o aninhamento e inversão)
             const geoJsonLayer = L.geoJSON(data, {
                 style: {
-                    color: '#ff6600',    // cor da borda do contorno
-                    weight: 3,           // espessura da linha
+                    color: '#0d2dfc',    // cor da borda do contorno
+                    weight: 5,           // espessura da linha
                     fill: false          // sem preenchimento
                 }
             }).addTo(map);
@@ -219,3 +219,4 @@ document.addEventListener('DOMContentLoaded', function () {
     playAgainButton.addEventListener('click', () => location.reload());
 
 });
+
