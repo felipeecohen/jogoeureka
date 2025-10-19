@@ -240,25 +240,37 @@ tr:hover {
 
 /* ======= RESPONSIVIDADE CELULAR/TABLET ======= */
 @media (max-width: 768px) {
-    /* Esconde o título e os três riscos do menu */
+    /* Sidebar vira header horizontal no topo */
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        justify-content: space-between;
+        padding: 8px 12px;
+        border-right: none;
+        border-bottom: 2px solid #ddd;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    /* Esconde título e menu-icon para liberar espaço */
     .sidebar .header h2,
     .sidebar .header .menu-icon {
         display: none;
     }
 
-    /* Reduz a largura da sidebar */
-    .sidebar {
-        width: 200px;
-        padding: 15px;
-    }
-
     /* Ajusta mapa para ocupar o restante da tela */
     #map {
-        width: calc(100% - 200px);
+        flex: 1;
+        width: 100%;
+        height: calc(100vh - 50px); /* reduz a altura do header */
     }
 
-    /* Ajuste geral de padding para conteúdos internos se necessário */
+    /* Ajuste de padding do overlay inicial */
     .overlay-content {
-        padding: 40px 30px;
+        padding: 40px 20px;
     }
 }
