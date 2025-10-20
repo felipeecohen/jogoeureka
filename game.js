@@ -164,7 +164,7 @@ selectablePoints.forEach((point, index) => {
 correctPoints.forEach(p => {
     L.circleMarker(p, {
         radius: 10,
-        color: 'green',       // borda verde
+        color: '#2fd431',       // borda verde
         weight: 4,            // borda mais espessa
         fillColor: 'transparent',
         fillOpacity: 0
@@ -198,3 +198,4 @@ correctPoints.forEach(p => {
     playAgainButton.addEventListener('click', () => location.reload());
 
 });
+
