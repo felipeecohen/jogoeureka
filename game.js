@@ -25,48 +25,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // --- 2. DADOS (30 opções e 7 corretos) ---
     const selectablePoints = [
-    [-23.62909, -46.56753],
-    [-23.62554, -46.57502],
-    [-23.64662, -46.57615],
-    [-23.64019, -46.57460],
-    [-23.61782, -46.56961],
-    [-23.61835, -46.57463],
-    [-23.60667, -46.56602],
-    [-23.63209, -46.56488],
-    [-23.62274, -46.55676],
-    [-23.61319, -46.57705],
-    [-23.61590, -46.56925],
-    [-23.63309, -46.58313],
-    [-23.62187, -46.58150],
-    [-23.62503, -46.55721],
-    [-23.63547, -46.55407],
-    [-23.61743, -46.55275],
-    [-23.63500, -46.55839],
-    [-23.62896, -46.57504],
-    [-23.64273, -46.56068],
-    [-23.62710, -46.56801],
-    [-23.61073, -46.55121],
-    [-23.60359, -46.57058],
-    [-23.62600, -46.55724],
-    [-23.61255, -46.56821],
-    [-23.61148, -46.57334],
-    [-23.60232, -46.57687],
-    [-23.64809, -46.55629],
-    [-23.63880, -46.56394],
-    [-23.62168, -46.54903],
-    [-23.64842, -46.57071],
-    [-23.63652, -46.55885]
-];
+        [-23.614, -46.569], [-23.620, -46.574], [-23.618, -46.555], [-23.625, -46.563],
+        [-23.630, -46.558], [-23.622, -46.551], [-23.611, -46.561], [-23.628, -46.572],
+        [-23.619, -46.565], [-23.623, -46.549], [-23.632, -46.567], [-23.615, -46.552],
+        [-23.627, -46.559], [-23.610, -46.570], [-23.621, -46.578], [-23.635, -46.553],
+        [-23.609, -46.556], [-23.626, -46.568], [-23.613, -46.563], [-23.629, -46.550],
+        [-23.617, -46.576], [-23.624, -46.557], [-23.631, -46.562], [-23.612, -46.548],
+        [-23.625, -46.575], [-23.616, -46.559], [-23.633, -46.571], [-23.608, -46.564],
+        [-23.622, -46.569], [-23.619, -46.553]
+    ];
 
     const correctPoints = [
-    [-23.62909, -46.56753],
-    [-23.64019, -46.57460],
-    [-23.63209, -46.56488],
-    [-23.62274, -46.55676],
-    [-23.61590, -46.56925],
-    [-23.63547, -46.55407],
-    [-23.64273, -46.56068]
-];
+        [-23.614, -46.569], [-23.620, -46.574], [-23.630, -46.558],
+        [-23.611, -46.561], [-23.628, -46.572], [-23.619, -46.565], [-23.623, -46.549]
+    ];
 
     const MAX_SELECTIONS = 7;
     let userSelections = [];
@@ -117,31 +89,35 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // --- 5. CRIA OS MARCADORES ---
-   selectablePoints.forEach((point, index) => {
+selectablePoints.forEach((point, index) => {
     const marker = L.circleMarker(point, {
         radius: 7,
-        color: '#070f63',    // azul-marinho
-        fillColor: '#070f63', 
-        fillOpacity: 0.8
+        color: '#666',       // borda cinza
+        fillColor: '#999',   // cinza claro
+        fillOpacity: 0.9
     }).addTo(map).bindTooltip(`Ponto ${index + 1}`);
 
     marker.on('click', function () {
         if (gameState !== 'playing') return;
 
-        if (userSelections.includes(marker)) {
-            if (marker.selectedCircle) {
-                map.removeLayer(marker.selectedCircle);
-                marker.selectedCircle = null;
-            }
+        // Se já está selecionado, desmarca
+        if (marker.isSelected) {
+            marker.setStyle({
+                color: '#818281',
+                fillColor: '#818281',
+                radius: 7
+            });
+            marker.isSelected = false;
             userSelections = userSelections.filter(m => m !== marker);
-        } else if (userSelections.length < MAX_SELECTIONS) {
-            const highlight = L.circleMarker(point, {
-                radius: 10,
-                color: '#FFB300',   // amarelo mais escuro
+        } 
+        // Caso contrário, seleciona (se ainda houver espaço)
+        else if (userSelections.length < MAX_SELECTIONS) {
+            marker.setStyle({
+                color: '#FFB300',   // amarelo escuro
                 fillColor: '#FFB300',
-                fillOpacity: 0.9
-            }).addTo(map);
-            marker.selectedCircle = highlight;
+                radius: 9
+            });
+            marker.isSelected = true;
             userSelections.push(marker);
         }
 
@@ -222,5 +198,3 @@ correctPoints.forEach(p => {
     playAgainButton.addEventListener('click', () => location.reload());
 
 });
-
-
